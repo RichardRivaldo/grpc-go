@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package dummy;
+
+option go_package = "github.com/RichardRivaldo/grpc-go/dummy/proto";
+
+message Dummy {
+    int32 dummy = 1;
+}
+
+service DummyService {
+    
+}
