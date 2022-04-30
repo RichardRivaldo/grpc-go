@@ -22,5 +22,6 @@ func main() {
 	defer conn.Close()
 
 	client := pb.NewGreetServiceClient(conn)
-	greet(client)
+	// greet(client)
+	streamGreet(client)
 }
