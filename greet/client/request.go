@@ -80,3 +80,49 @@ func spamGreet(c pb.GreetServiceClient) {
 
 	log.Println(res.Result)
 }
+
+func multiGreet(c pb.GreetServiceClient) {
+	log.Println("Multi Greet Invoked!")
+
+	stream, err := c.MultiGreet(context.Background())
+
+	if err != nil {
+		log.Fatalf("Error when multi greet, reason %v\n", err)
+	}
+
+	requests := []*pb.GreetRequest{
+		{PersonName: "richard1"},
+		{PersonName: "richard2"},
+		{PersonName: "richard3"},
+	}
+
+	waitc := make(chan struct{})
+
+	go func() {
+		for i, req := range requests {
+			log.Printf("Sending request of %d: %v", i, req)
+			stream.Send(req)
+			time.Sleep(1 * time.Second)
+		}
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+
+			if err == io.EOF {
+				break
+			}
+
+			if err != nil {
+				log.Fatalf("Error when receiving greet, reason %v\n", err)
+			}
+
+			log.Println(res.Result)
+		}
+		close(waitc)
+	}()
+
+	<-waitc
+}

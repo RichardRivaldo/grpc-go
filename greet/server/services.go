@@ -52,3 +52,28 @@ func (s *Server) SpamGreet(stream pb.GreetService_SpamGreetServer) error {
 		res += fmt.Sprintf("Greetings, %s\n", req.PersonName)
 	}
 }
+
+func (s *Server) MultiGreet(stream pb.GreetService_MultiGreetServer) error {
+	log.Printf("Multi Greet\n")
+
+	for {
+		req, err := stream.Recv()
+
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			log.Fatalf("Error when streaming request, reason %v\n", err)
+		}
+
+		res := "Greetings, " + req.PersonName
+		err = stream.Send(&pb.GreetResponse{
+			Result: res,
+		})
+
+		if err != nil {
+			log.Fatalf("Error when sending response, reason %v\n", err)
+		}
+	}
+}
