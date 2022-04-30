@@ -23,5 +23,6 @@ func main() {
 
 	client := pb.NewGreetServiceClient(conn)
 	// greet(client)
-	streamGreet(client)
+	// streamGreet(client)
+	spamGreet(client)
 }
