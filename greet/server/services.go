@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	pb "github.com/RichardRivaldo/grpc-go/greet/proto"
@@ -27,4 +28,27 @@ func (s *Server) StreamGreet(in *pb.GreetRequest, stream pb.GreetService_StreamG
 	}
 
 	return nil
+}
+
+func (s *Server) SpamGreet(stream pb.GreetService_SpamGreetServer) error {
+	log.Printf("Spam Greet\n")
+
+	res := ""
+
+	for {
+		req, err := stream.Recv()
+
+		if err == io.EOF {
+			return stream.SendAndClose(&pb.GreetResponse{
+				Result: res,
+			})
+		}
+
+		if err != nil {
+			log.Fatalf("Error when streaming request, reason %v\n", err)
+		}
+
+		log.Printf("Receiving request of %v\n", req)
+		res += fmt.Sprintf("Greetings, %s\n", req.PersonName)
+	}
 }

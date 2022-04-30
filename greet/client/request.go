@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"time"
 
 	pb "github.com/RichardRivaldo/grpc-go/greet/proto"
 )
@@ -48,4 +49,34 @@ func streamGreet(c pb.GreetServiceClient) {
 
 		log.Println(msg)
 	}
+}
+
+func spamGreet(c pb.GreetServiceClient) {
+	log.Println("Spam Greet Invoked!")
+
+	requests := []*pb.GreetRequest{
+		{PersonName: "richard1"},
+		{PersonName: "richard2"},
+		{PersonName: "richard3"},
+	}
+
+	stream, err := c.SpamGreet(context.Background())
+
+	if err != nil {
+		log.Fatalf("Error when spamming greet, reason %v\n", err)
+	}
+
+	for i, req := range requests {
+		log.Printf("Sending request of %d: %v\n", i, req)
+		stream.Send(req)
+		time.Sleep(1 * time.Second)
+	}
+
+	res, err := stream.CloseAndRecv()
+
+	if err != nil {
+		log.Fatalf("Error when receiving spam reply, reason %v\n", err)
+	}
+
+	log.Println(res.Result)
 }
