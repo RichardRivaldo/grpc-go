@@ -15,4 +15,5 @@ message GreetResponse {
 service GreetService {
     rpc Greet(GreetRequest) returns (GreetResponse);
     rpc StreamGreet(GreetRequest) returns (stream GreetResponse);
+    rpc SpamGreet(stream GreetRequest) returns (GreetResponse);
 }
