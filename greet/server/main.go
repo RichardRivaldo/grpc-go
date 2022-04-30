@@ -24,6 +24,7 @@ func main() {
 
 	// gRPC Server serving the port listener
 	s := grpc.NewServer()
+	pb.RegisterGreetServiceServer(s, &Server{})
 	if err = s.Serve(listener); err != nil {
 		log.Fatalf("Failed serving the server, reason %v\n", err)
 	}

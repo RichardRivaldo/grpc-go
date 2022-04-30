@@ -5,6 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	pb "github.com/RichardRivaldo/grpc-go/greet/proto"
 )
 
 var server_addr string = "0.0.0.0:9999"
@@ -18,4 +20,7 @@ func main() {
 		log.Fatalf("Failed dialing the gRPC server, reason %v\n", err)
 	}
 	defer conn.Close()
+
+	client := pb.NewGreetServiceClient(conn)
+	greet(client)
 }
