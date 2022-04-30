@@ -59,3 +59,33 @@ func (s *Server) Average(stream pb.CalculatorService_AverageServer) error {
 		n++
 	}
 }
+
+func (s *Server) Max(stream pb.CalculatorService_MaxServer) error {
+	log.Printf("Client Stream - Average request")
+
+	var res int32 = 0
+
+	for {
+		msg, err := stream.Recv()
+
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			log.Fatalf("Failed receiving stream, reason %v\n", err)
+		}
+
+		if msg.Number > res {
+			res = msg.Number
+
+			err := stream.Send(&pb.MaxResponse{
+				Max: res,
+			})
+
+			if err != nil {
+				log.Fatalf("Failed sending response, reason %v\n", err)
+			}
+		}
+	}
+}

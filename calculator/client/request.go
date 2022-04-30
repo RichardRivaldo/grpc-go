@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"time"
 
 	pb "github.com/RichardRivaldo/grpc-go/calculator/proto"
 )
@@ -76,4 +77,48 @@ func average(client pb.CalculatorServiceClient) {
 	}
 
 	log.Println(res.Average)
+}
+
+func max(client pb.CalculatorServiceClient) {
+	log.Println("Max Service Invoked!")
+
+	stream, err := client.Max(context.Background())
+
+	if err != nil {
+		log.Fatalf("Error when streaming max, reason %v\n", err)
+	}
+
+	waitc := make(chan struct{})
+
+	go func() {
+		numbers := []int32{4, 6, 12, 412, 72341, 72153, 33}
+
+		for i, num := range numbers {
+			log.Printf("Sending request of %d: %v\n", i, num)
+			stream.Send(&pb.MaxRequest{
+				Number: num,
+			})
+			time.Sleep(1 * time.Second)
+		}
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			res, err := stream.Recv()
+
+			if err == io.EOF {
+				break
+			}
+
+			if err != nil {
+				log.Fatalf("Error when receiving result, reason %v\n", err)
+			}
+
+			log.Println(res.Max)
+		}
+		close(waitc)
+	}()
+
+	<-waitc
 }
